@@ -1,4 +1,3 @@
-
 import tkinter as tk
 from tkinter import simpledialog, filedialog, messagebox
 from tkinter import ttk
@@ -27,6 +26,34 @@ class PlanningPokerGUI:
 
         self.main_frame = tk.Frame(self.root)
         self.main_frame.pack(side='left', fill='both', expand=True)
+        
+        self.selected_rule_label = tk.Label(self.main_frame, text="Selected Rules: None")
+        # self.selected_rule_label.pack(side='left', padx=5, pady=10)
+
+        # Divide the right side into two parts (40%, 60%)
+        right_frame = tk.Frame(self.main_frame)
+        right_frame.pack(side='left', fill='both', expand=True, pady=0)  # Adjust pady value as needed
+        self.top_labels = []
+
+        frame1 = tk.Frame(right_frame)
+        frame1.grid(row=0, column=0, pady=20)
+
+        frame2 = tk.Frame(right_frame)
+        frame2.grid(row=0, column=1, pady=20)
+
+        # Create initial top labels in the frames
+        label1 = tk.Label(frame1, text="Label 1")
+        label1.pack()
+
+        label2 = tk.Label(frame2, text="Label 2")
+        label2.pack()
+
+        # Append labels to the list
+        self.top_labels.extend([label1, label2])
+
+        # Create a label to display players
+        self.players_label = tk.Label(right_frame)
+        # self.players_label.pack(side='left', padx=5)
 
         self.create_menu()
 
@@ -64,36 +91,20 @@ class PlanningPokerGUI:
 
             ttk.Button(menu_frame, text=text, command=command, style=f"TButton{i}.TButton").grid(row=i, column=0, pady=5)
 
-        # Create a label to display players
-        self.players_label = tk.Label(self.main_frame, text="Players:")
-        self.players_label.pack(side='left', padx=5)  # Use 'left' to place it on the left side
-
-
     def set_initial_size(self):
         self.root.geometry("400x300")
 
-    def choose_rules(self):
-        rules_list = ["Strict (Unanimity)", "Average"]
-        rule_choice = simpledialog.askstring("Choose Rules", "Choose planning poker rules:", initialvalue=rules_list[0])
-        if rule_choice == "Strict (Unanimity)":
-            self.rules = StrictRule()
-        elif rule_choice == "Average":
-            self.rules = AverageRule()
-
-    def enter_players_count(self,window):
-        # Create a custom dialog window
+    def enter_players_count(self, window):
         players_entry_window = tk.Toplevel(self.root)
         players_entry_window.title("Enter Players")
-        players_entry_window.geometry("500x500")
+        players_entry_window.geometry("400x400")
         players_entry_window.configure(bg='teal')
         players_entry_window.resizable(width=False, height=False)
 
-        # Label and Entry for entering the number of players
         num_players_label = tk.Label(players_entry_window, text="Enter the number of players:", bg='teal', fg='white')
         num_players_label.pack(pady=5)
         num_players_entry = tk.Entry(players_entry_window)
         num_players_entry.pack(pady=5)
-
 
         confirm_button = tk.Button(players_entry_window, text="Confirm", command=lambda: self.process_players_input(players_entry_window, num_players_entry.get()))
         confirm_button.pack(pady=10)
@@ -108,47 +119,66 @@ class PlanningPokerGUI:
             tk.messagebox.showwarning("Warning", "Invalid input. Please enter a valid number.")
             return
 
-        # Label and Entry for entering player names
         player_names_label = tk.Label(window, text=f"Enter {num_players} player names separated by commas:", bg='teal', fg='white')
         player_names_label.pack(pady=5)
         player_names_entry = tk.Entry(window)
         player_names_entry.pack(pady=5)
 
-        # Button to confirm and proceed
         confirm_button = tk.Button(window, text="Confirm", command=lambda: self.process_player_names(player_names_entry.get(), num_players, window))
         confirm_button.pack(pady=10)
 
     def process_player_names(self, players_input, num_players, window):
-        # Destroy the input window after processing
         window.destroy()
 
         if players_input is None:
             tk.messagebox.showwarning("Warning", "No players entered.")
             return
 
-        # Split the input by commas to get individual player names
         player_names = [name.strip() for name in players_input.split(',')]
 
-        # Check if the entered number of players matches the count
         if len(player_names) != num_players:
             tk.messagebox.showwarning("Warning", f"Entered {len(player_names)} players, but expected {num_players}. Please try again.")
             return
 
-        # Update the players list
         self.players = player_names
-
-        # Update the label in the main window
         self.update_players_label()
-
-
-           
-
 
     def update_players_label(self):
         players_text = "Players:\n" + "\n".join([f"Player {i}: {player_name}" for i, player_name in enumerate(self.players, start=1)])
         self.players_label.config(text=players_text)
-
+        self.top_labels[0].config(text=f" {players_text}")
     
+
+
+
+    def choose_rules(self):
+        rule_selection_window = tk.Toplevel(self.root)
+        rule_selection_window.title("Select Planning Poker Rules")
+        rule_selection_window.geometry("400x400")
+        rule_selection_window.configure(bg='teal')
+        rule_selection_window.resizable(width=False, height=False)
+
+        instruction_label = tk.Label(rule_selection_window, text="Select planning poker rules:", bg='teal', fg='white')
+        instruction_label.pack(pady=10)
+
+        rules_list = ["Strict (Unanimity)", "Average"]
+        selected_rule_var = tk.StringVar(value=rules_list[0])
+        rules_combobox = ttk.Combobox(rule_selection_window, values=rules_list, textvariable=selected_rule_var)
+        rules_combobox.pack(pady=10)
+
+        confirm_button = tk.Button(rule_selection_window, text="Confirm", command=lambda: self.process_rule_selection(rule_selection_window, selected_rule_var.get()))
+        confirm_button.pack(pady=10)
+
+    def process_rule_selection(self, window, selected_rule):
+        window.destroy()
+
+        if selected_rule == "Strict (Unanimity)":
+            self.rules = StrictRule()
+        elif selected_rule == "Average":
+            self.rules = AverageRule()
+
+        self.selected_rule_label.config(text=f"Selected Rule: {selected_rule}")
+        self.top_labels[1].config(text=f"Selected Rule: {selected_rule}")
 
     def enter_features(self):
         features_str = simpledialog.askstring("Enter Features", "Enter features (backlog) in JSON format:")
