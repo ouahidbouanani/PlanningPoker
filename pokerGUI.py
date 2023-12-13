@@ -181,17 +181,34 @@ class PlanningPokerGUI:
         self.top_labels[1].config(text=f"Selected Rule: {selected_rule}")
 
     def enter_features(self):
-        features_str = simpledialog.askstring("Enter Features", "Enter features (backlog) in JSON format:")
+        features_entry_window = tk.Toplevel(self.root)
+        features_entry_window.title("Enter Features")
+        features_entry_window.geometry("400x400")
+        features_entry_window.configure(bg='teal')
+        features_entry_window.resizable(width=False, height=False)
 
-        if features_str is None:
+        features_label = tk.Label(features_entry_window, text="Enter features (backlog) in JSON format: ", bg='teal', fg='white')
+        features_label.pack(pady=10)
+
+        features_entry = tk.Text(features_entry_window, wrap="word", height=10, width=40)
+        features_entry.pack(pady=10)
+
+        confirm_button = tk.Button(features_entry_window, text="Confirm", command=lambda: self.process_features_input(features_entry.get("1.0", tk.END), features_entry_window))
+        confirm_button.pack(pady=10)
+
+    def process_features_input(self, features_input, window):
+        window.destroy()
+
+        if not features_input.strip():
             tk.messagebox.showwarning("Warning", "No features entered.")
             return
 
         try:
-            self.features = json.loads(features_str)
+            self.features = json.loads(features_input)
         except json.decoder.JSONDecodeError:
             tk.messagebox.showerror("Error", "Invalid JSON format. Please enter features in correct JSON format.")
             return
+
 
     def start_voting(self):
         if not self.players or not self.features or not self.rules:
