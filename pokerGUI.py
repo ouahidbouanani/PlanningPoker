@@ -1,6 +1,3 @@
-
-
-
 import tkinter as tk
 from tkinter import simpledialog, filedialog, messagebox
 from tkinter import ttk
@@ -244,9 +241,8 @@ class PlanningPokerGUI:
         print("Collected Votes:")
         for (player, feature), vote in self.votes.items():
             print(f"{player}'s Vote for {feature}: {vote}")
-
-
-
+    
+    
     def start_voting(self):
         if not self.players or not self.features or not self.rules:
             tk.messagebox.showwarning("Warning", "Please enter players, features, and choose rules before starting voting.")
@@ -283,11 +279,22 @@ class PlanningPokerGUI:
         # Store the vote_text in a list for later access
         self.vote_texts = [vote_text] * len(self.players)
 
-        # Create buttons with corresponding values
-        values = [0, 1, 2, 3, 5, 8, 13, 20, 40, 100, 200, 300]
-        for i, value in enumerate(values):
-            button = tk.Button(self.voting_window, text=str(value), command=lambda v=value: self.update_vote_text(v))
+        # Create buttons with corresponding PNG images
+        image_paths = ["cartes_0.png", "cartes_1.png", "cartes_2.png", "cartes_3.png", "cartes_5.png", "cartes_8.png", "cartes_13.png", "cartes_20.png", "cartes_40.png", "cartes_100.png", "cartes_cafe.png", "cartes_interro.png"]
+
+        for i, image_path in enumerate(image_paths):
+            img = Image.open(image_path)
+            img = img.resize((100, 100))
+            img = ImageTk.PhotoImage(img)
+
+            button = tk.Button(self.voting_window, image=img, command=lambda v=i: self.update_vote_text(v))
+            button.image = img
             button.pack(side="left", padx=5)
+
+    
+    
+    
+    
 
     def submit_vote(self, vote_text, label_text):
         # Get the currently selected vote_text
@@ -316,11 +323,6 @@ class PlanningPokerGUI:
             # Clear the content of the text box
             vote_text.delete("1.0", tk.END)
 
-    # def evaluate_votes(self):
-    #     print("Collected Votes:")
-    #     for (player, feature), vote in self.votes.items():
-    #         print(f"{player}'s Vote for {feature}: {vote}")
-    #     tk.messagebox.showinfo("Voting Result", "Voting process is complete. Display the result here.")
     
     def evaluate_votes(self):
         print("Collected Votes:")
