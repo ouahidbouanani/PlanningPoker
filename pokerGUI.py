@@ -1,3 +1,61 @@
+
+
+
+"""
+@mainpage Planning Poker GUI Documentation
+
+@section project_presentation Project Presentation
+
+The Planning Poker GUI is designed to facilitate the Planning Poker estimation technique in Agile development.
+It provides a visually intuitive interface for teams to collaboratively estimate task efforts during sprint planning.
+The GUI aims to enhance communication, accuracy, and efficiency in the estimation process.
+
+
+This separation enables easy updates to the user interface and logic independently, promoting a more flexible and
+maintainable codebase.
+
+@section chosen_patterns Chosen Patterns
+
+The GUI leverages the Observer pattern to efficiently handle updates in the voting process. The Model notifies the
+View of any changes in the data (e.g., votes), ensuring real-time updates in the user interface.
+
+The Strategy pattern is employed in the implementation of voting rules. The ability to switch between Strict and
+Average rules is achieved by encapsulating each rule in a separate class (StrictRule and AverageRule). This allows
+for interchangeable rule implementations without modifying the core application logic.
+
+@section diagrams_explanation Diagrams Explanation
+
+### Class Diagram:
+@image html 1.png "Class Diagram"
+A Class Diagram provides an overview of the classes in the application and their relationships. It illustrates how
+the PlanningPokerGUI, StrictRule, and AverageRule classes are structured and interact.
+
+### Sequence Diagram:
+@image html sequence_diagram.png "Sequence Diagram"
+A Sequence Diagram demonstrates the flow of interactions during the voting process. It showcases how the GUI
+coordinates with the voting rules, players, and features to achieve a collaborative estimation.
+
+@section continuous_integration Continuous Integration
+
+Continuous Integration (CI) is set up using a CI/CD pipeline with a version control system (e.g., Git) and a CI service
+such as Jenkins or GitHub Actions. The pipeline includes steps for code linting, unit testing, and deployment.
+
+- Code Linting: Ensures code consistency and adherence to coding standards.
+- Unit Testing: Validates the functionality of individual units or components.
+- Deployment: Automates the deployment process to ensure a consistent and reliable release.
+
+CI enables early detection of issues, promotes code quality, and streamlines the development and deployment workflow.
+
+@note
+For detailed information on each topic, refer to the specific sections in the documentation.
+
+@see
+For detailed documentation on each class and their methods, refer to the respective class documentation.
+"""
+
+
+
+
 import tkinter as tk
 from tkinter import simpledialog, filedialog, messagebox
 from tkinter import ttk
@@ -8,7 +66,47 @@ from strict_rule import StrictRule
 from average_rule import AverageRule
 
 class PlanningPokerGUI:
+    """
+    @brief Class for the Planning Poker GUI application.
+
+    @details
+    This class represents the graphical user interface (GUI) for a Planning Poker application.
+    It includes attributes to manage the main window, players, features, votes, rules, and the voting process.
+
+    @note
+    To use this class, create an instance and call the `run` method to start the Tkinter main loop.
+
+    @warning
+    Make sure to set the necessary attributes such as players, features, and rules before starting the voting process.
+
+    @code
+    planning_poker_gui = PlanningPokerGUI()
+    planning_poker_gui.run()
+    @endcode
+
+    @see
+    For additional information on how to use this class, refer to the documentation of its methods.
+
+    @par Attributes:
+    - root: The main Tkinter window.
+    - players: List of player names.
+    - features: List of features (backlog).
+    - votes: Dictionary to store votes.
+    - rules: Rules object for voting validation.
+    - voting_window: Tkinter window for the voting process.
+    - current_player_index: Index to keep track of the current player.
+    - current_feature_index: Index to keep track of the current feature.
+    - left_frame: Tkinter Frame for the left side of the main window.
+    - main_frame: Tkinter Frame for the main content.
+    - selected_rule_label: Tkinter Label to display the selected rules.
+    - top_labels: List to store top labels for display.
+    """
     def __init__(self):
+        """
+        @brief Constructor for the PlanningPokerGUI class.
+
+        Initializes the main Tkinter window and sets up the GUI elements.
+        """
         self.root = tk.Tk()
         self.root.title("Planning Poker")
 
@@ -42,23 +140,34 @@ class PlanningPokerGUI:
 
         frame2 = tk.Frame(right_frame)
         frame2.grid(row=0, column=1, pady=20)
+        
+        frame3 = tk.Frame(right_frame)
+        frame3.grid(row=0, column=2, pady=20)
 
         # Create initial top labels in the frames
-        label1 = tk.Label(frame1, text="Label 1")
+        label1 = tk.Label(frame1, text="Players........")
         label1.pack()
 
-        label2 = tk.Label(frame2, text="Label 2")
+        label2 = tk.Label(frame2, text="Rules.........")
         label2.pack()
+        
+        label3 = tk.Label(frame3, text="Features.........")
+        label3.pack()
 
         # Append labels to the list
-        self.top_labels.extend([label1, label2])
+        self.top_labels.extend([label1, label2,label3])
 
         # Create a label to display players
         self.players_label = tk.Label(right_frame)
-
         self.create_menu()
 
+
     def create_menu(self):
+        """
+        @brief Create the menu section on the left side of the main window.
+
+        Creates labels, buttons, and other GUI elements for user interaction.
+        """
         menu_frame = tk.Frame(self.left_frame, bg='teal')
         menu_frame.pack()
 
@@ -92,10 +201,28 @@ class PlanningPokerGUI:
 
             ttk.Button(menu_frame, text=text, command=command, style=f"TButton{i}.TButton").grid(row=i, column=0, pady=5)
 
+
     def set_initial_size(self):
+        """
+        @brief Set the initial size of the main window.
+
+        Called after a delay to adjust the size of the main window.
+        """
         self.root.geometry("400x300")
 
+
     def enter_players_count(self, window):
+        """
+        @brief Prompt the user to enter the number of players.
+
+        This method creates a new Toplevel window for entering the number of players.
+        It includes a label, an entry field, and a confirmation button.
+        The confirmation button triggers the processing of player input.
+
+        @param window The Tkinter window for player count input.
+
+        @return void
+        """
         players_entry_window = tk.Toplevel(self.root)
         players_entry_window.title("Enter Players")
         players_entry_window.geometry("400x400")
@@ -110,7 +237,22 @@ class PlanningPokerGUI:
         confirm_button = tk.Button(players_entry_window, text="Confirm", command=lambda: self.process_players_input(players_entry_window, num_players_entry.get()))
         confirm_button.pack(pady=10)
 
+
     def process_players_input(self, window, num_players):
+        """
+        @brief Process user input for the number of players and set up player name entry.
+
+        This function takes the graphical user interface window and the number of players as input.
+        It attempts to convert the provided number of players to an integer and validates if it is a positive integer.
+        If the input is invalid, warning messages are displayed, and the function returns.
+        If the input is valid, the function dynamically creates a label and an entry widget for player names.
+        Additionally, a "Confirm" button is created with a callback function to process the entered player names.
+
+        @param window The graphical user interface window in which the input will be processed.
+        @param num_players The user-provided input indicating the desired number of players.
+
+        @return void
+        """
         try:
             num_players = int(num_players)
             if num_players <= 0:
@@ -128,7 +270,23 @@ class PlanningPokerGUI:
         confirm_button = tk.Button(window, text="Confirm", command=lambda: self.process_player_names(player_names_entry.get(), num_players, window))
         confirm_button.pack(pady=10)
 
+
     def process_player_names(self, players_input, num_players, window):
+        """
+        @brief Process the entered player names and update the players list.
+
+        This function takes the entered player names, the expected number of players, and the Tkinter window for player names input.
+        It destroys the input window and performs validation on the entered player names.
+        If no players are entered, a warning message is displayed, and the function returns.
+        If the number of entered players does not match the expected number, a warning message is shown, and the function returns.
+        Otherwise, the players list is updated, and the method 'update_players_label' is called to reflect the changes.
+
+        @param players_input Entered player names separated by commas.
+        @param num_players Number of players expected.
+        @param window Tkinter window for player names input.
+
+        @return void
+        """
         window.destroy()
 
         if players_input is None:
@@ -144,12 +302,31 @@ class PlanningPokerGUI:
         self.players = player_names
         self.update_players_label()
 
+
     def update_players_label(self):
+        """
+        @brief Update the label displaying the list of players.
+
+        This method updates the label that displays the list of players.
+        It generates a formatted text containing the player names and their corresponding indices, and updates the GUI accordingly.
+
+        @return void
+        """
         players_text = "Players:\n" + "\n".join([f"Player {i}: {player_name}" for i, player_name in enumerate(self.players, start=1)])
         self.players_label.config(text=players_text)
         self.top_labels[0].config(text=f" {players_text}")
 
+
     def choose_rules(self):
+        """
+        @brief Create a window for selecting planning poker rules.
+
+        This method creates a window for selecting planning poker rules. The window includes a label with instructions,
+        a combobox for choosing from a predefined list of rules, and a confirmation button.
+        The selected rule is then processed using the 'process_rule_selection' method.
+
+        @return void
+        """
         rule_selection_window = tk.Toplevel(self.root)
         rule_selection_window.title("Select Planning Poker Rules")
         rule_selection_window.geometry("400x400")
@@ -167,7 +344,20 @@ class PlanningPokerGUI:
         confirm_button = tk.Button(rule_selection_window, text="Confirm", command=lambda: self.process_rule_selection(rule_selection_window, selected_rule_var.get()))
         confirm_button.pack(pady=10)
 
+
     def process_rule_selection(self, window, selected_rule):
+        """
+        @brief Process the selected planning poker rule and update the rules attribute.
+
+        This method takes the Tkinter window for rule selection and the selected planning poker rule as input.
+        It destroys the rule selection window and updates the 'rules' attribute based on the selected rule.
+        The method then updates the labels displaying the selected rule in the GUI.
+
+        @param window Tkinter window for rule selection.
+        @param selected_rule Selected planning poker rule.
+
+        @return void
+        """
         window.destroy()
 
         if selected_rule == "Strict (Unanimity)":
@@ -178,7 +368,17 @@ class PlanningPokerGUI:
         self.selected_rule_label.config(text=f"Selected Rule: {selected_rule}")
         self.top_labels[1].config(text=f"Selected Rule: {selected_rule}")
 
+
     def enter_features(self):
+        """
+        @brief Create a window for entering features in JSON format.
+
+        This method creates a window for entering features (backlog) in JSON format. The window includes a label with instructions,
+        a text entry field for typing the features, and a confirmation button.
+        The entered features are then processed using the 'process_features_input' method.
+
+        @return void
+        """
         features_entry_window = tk.Toplevel(self.root)
         features_entry_window.title("Enter Features")
         features_entry_window.geometry("400x400")
@@ -193,8 +393,22 @@ class PlanningPokerGUI:
 
         confirm_button = tk.Button(features_entry_window, text="Confirm", command=lambda: self.process_features_input(features_entry.get("1.0", tk.END), features_entry_window))
         confirm_button.pack(pady=10)
+        
+
 
     def process_features_input(self, features_input, window):
+        """
+        @brief Process the entered features in JSON format and update the features attribute.
+
+        This method takes the entered features in JSON format and the Tkinter window for feature entry as input.
+        It destroys the feature entry window and attempts to parse the entered JSON features.
+        If successful, it updates the 'features' attribute; otherwise, it displays an error message.
+
+        @param features_input Entered features in JSON format.
+        @param window Tkinter window for feature entry.
+
+        @return void
+        """
         window.destroy()
 
         if not features_input.strip():
@@ -203,47 +417,71 @@ class PlanningPokerGUI:
 
         try:
             self.features = json.loads(features_input)
+            self.update_features_label()
         except json.decoder.JSONDecodeError:
             tk.messagebox.showerror("Error", "Invalid JSON format. Please enter features in correct JSON format.")
             return
 
+
     def set_vote_result(self, player, result_entry, feature, label_text):
+        """
+        @brief Set the vote result for a player on a specific feature.
+    
+        This method takes the player, result entry, feature, and label text as input.
+        It collects and stores the vote result for the given player and feature.
+        After each vote, it checks if all votes are collected before evaluating.
+        It then updates the indices for the next set of widgets and clears the content of the text box.
+        If all features or votes are collected, it resets the corresponding indices and updates the label text accordingly.
+        If all votes are collected, it automatically submits the votes.
+    
+        @param player The player casting the vote.
+        @param result_entry The text entry field where the vote result is entered.
+        @param feature The feature for which the vote is being cast.
+        @param label_text The label text to be updated for the next set of widgets.
+    
+        @return void
+        """
         result = result_entry.get("1.0", tk.END).strip()
         self.votes[(player, feature)] = result
-
+    
         # Check if all votes are collected before evaluating
         if len(self.votes) == len(self.players) * len(self.features):
             self.evaluate_votes()
+        else:
+            # Update indices for the next set of widgets
+            self.current_player_index += 1
+            if self.current_player_index == len(self.players):
+                self.current_player_index = 0
+                self.current_feature_index += 1
+    
+            # If all features have been voted on, reset indices
+            if self.current_feature_index == len(self.features):
+                self.current_feature_index = 0
+    
+            # Clear the content of the text box
+            result_entry.delete("1.0", tk.END)
+    
+            # Update the label for the next set of widgets
+            label_text.set(f"{self.players[self.current_player_index]}'s Vote for {self.features[self.current_feature_index]}: ")
+    
+            # If all votes are collected, automatically submit the votes
+            if len(self.votes) == len(self.players) * len(self.features):
+                self.submit_votes()
 
-        # Update indices for the next set of widgets
-        self.current_player_index += 1
-        if self.current_player_index == len(self.players):
-            self.current_player_index = 0
-            self.current_feature_index += 1
 
-        # If all features have been voted on, reset indices
-        if self.current_feature_index == len(self.features):
-            self.current_feature_index = 0
-
-        # Clear the content of the text box
-        result_entry.delete("1.0", tk.END)
-
-        # Update the label for the next set of widgets
-        label_text.set(f"{self.players[self.current_player_index]}'s Vote for {self.features[self.current_feature_index]}: ")
-
-        # If all votes are collected, automatically submit the votes
-        if len(self.votes) == len(self.players) * len(self.features):
-            self.submit_votes()
-
-    def submit_votes(self):
-        # Implement the logic to handle the submitted votes
-        # For example, you can print the collected votes
-        print("Collected Votes:")
-        for (player, feature), vote in self.votes.items():
-            print(f"{player}'s Vote for {feature}: {vote}")
     
     
     def start_voting(self):
+        """
+        @brief Start the voting process by creating a window for voting.
+
+        This method initiates the voting process, ensuring that players, features, and rules are entered.
+        It resets the votes dictionary and indices, creates a new Toplevel window for voting, or updates the existing one.
+        The window includes labels for current voting information, text widget for voting, and buttons for submitting votes.
+        PNG images are used on buttons for different vote values.
+
+        @return void
+        """
         if not self.players or not self.features or not self.rules:
             tk.messagebox.showwarning("Warning", "Please enter players, features, and choose rules before starting voting.")
             return
@@ -291,12 +529,26 @@ class PlanningPokerGUI:
             button.image = img
             button.pack(side="left", padx=5)
 
+
     
     
     
     
 
     def submit_vote(self, vote_text, label_text):
+        """
+        @brief Submit a vote and handle the voting process.
+
+        This method takes a text entry field for voting (`vote_text`) and the label text for updating the next set of widgets.
+        It inserts the selected vote into the corresponding player's text box and checks if all votes are collected before evaluating.
+        If all votes are collected, it triggers the evaluation process. Otherwise, it moves to the next player and updates the label.
+        If all features have been voted on, it shows the result; otherwise, it updates the label for the next set of widgets.
+
+        @param vote_text The text entry field containing the selected vote.
+        @param label_text The label text for updating the next set of widgets.
+
+        @return void
+        """
         # Get the currently selected vote_text
         current_vote_text = self.vote_texts[self.current_player_index]
 
@@ -323,25 +575,70 @@ class PlanningPokerGUI:
             # Clear the content of the text box
             vote_text.delete("1.0", tk.END)
 
+
     
     def evaluate_votes(self):
+        """
+        @brief Evaluate and process the collected votes.
+    
+        This method prints the collected votes to the console and uses the specified rules to validate the votes.
+        If the votes are approved, it displays a message with the voting result, and you can customize the logic for further actions.
+        If the votes are not approved, it shows a warning message, clears the votes, and restarts the voting process.
+    
+        @return void
+        """
         print("Collected Votes:")
         for (player, feature), vote in self.votes.items():
             print(f"{player}'s Vote for {feature}: {vote}")
-
+    
         # Use rules to validate the votes
         if self.rules:
             approval_status = self.rules.validate_votes(self.votes)
             if approval_status:
-                tk.messagebox.showinfo("Voting Result", "Voting process is complete. Display the result here.")
-                self.save_difficulty_estimations()
+                # Check if the voting process is unanimous for all features
+                if self._is_unanimous_for_all_features():
+                    tk.messagebox.showinfo("Voting Result", "Voting process is complete. Display the result here.")
+                    self.voting_window.destroy()
+                else:
+                    tk.messagebox.showwarning("Warning", "Not all features received unanimous votes. Repeating the voting process.")
+                    # Clear votes and restart the voting process
+                    self.votes = {}
             else:
                 tk.messagebox.showwarning("Warning", "Feature not approved. Repeating the voting process.")
                 # Clear votes and restart the voting process
                 self.votes = {}
                 self.start_voting()
-                
+            # Destroy the voting window
+            if self.voting_window:
+                self.voting_window.destroy()
+    
+    def _is_unanimous_for_all_features(self):
+        """
+        @brief Check if the voting process is unanimous for all features.
+    
+        This method checks if all features have received unanimous votes from all players.
+    
+        @return bool: True if unanimous for all features, False otherwise.
+        """
+        for feature in self.features:
+            feature_votes = {player: self.votes.get((player, feature), '') for player in self.players}
+            print(feature_votes)
+            if not self.rules._check_unanimous(feature_votes):
+                return False
+        return True
+    
+    
+                    
     def save_difficulty_estimations(self):
+        """
+        @brief Save the difficulty estimations based on the collected votes to a JSON file.
+
+        This method prompts the user to choose a file path for saving the difficulty estimations in JSON format.
+        It calculates the average vote for each feature and saves the difficulty estimations to the specified file.
+        After saving, it displays an information message indicating the successful save.
+
+        @return void
+        """
         file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON files", "*.json")])
         if file_path:
             difficulty_estimations = {}
@@ -356,25 +653,67 @@ class PlanningPokerGUI:
 
 
 
+
     def update_vote_text(self, value):
+        """
+        @brief Update the vote text with the selected value.
+
+        This method takes a value and updates the text entry field for the current player's vote.
+        The value is inserted at the end of the current text.
+
+        @param value The selected value to be added to the vote text.
+
+        @return void
+        """
         # Get the currently selected vote_text
         current_vote_text = self.vote_texts[self.current_player_index]
         # Insert the selected value into the text box
         current_vote_text.insert(tk.END, str(value))
 
+
     def set_button_value(self, button_value, vote_text):
+        """
+        @brief Set the corresponding button value in the text box.
+
+        This method sets the corresponding button value in the text entry field for the current player's vote.
+        The value is appended to the existing text.
+
+        @param button_value The value associated with the clicked button.
+        @param vote_text The text entry field for the current player's vote.
+
+        @return void
+        """
         # Set the corresponding button value in the text box
         current_text = vote_text.get("1.0", tk.END)
         updated_text = f"{current_text.strip()}\n{button_value}"
         vote_text.delete("1.0", tk.END)
         vote_text.insert(tk.END, updated_text)
-    
+
 
     def close_voting_screen(self):
+        """
+        @brief Close the voting screen window.
+
+        This method checks if the voting window is open and closes it if it exists.
+        It sets the voting window attribute to None after closing.
+
+        @return void
+        """
         if self.voting_window:
             self.voting_window.destroy()
             self.voting_window = None
+
+            
+            
     def save_progress(self):
+        """
+        @brief Save the current progress, including players, features, rules, and collected votes, to a JSON file.
+
+        This method prompts the user to choose a file path for saving the progress in JSON format.
+        It includes information about players, features, rules, and collected votes in the saved data.
+
+        @return void
+        """
         if not self.players or not self.features or not self.rules:
             tk.messagebox.showwarning("Warning", "Nothing to save. Please enter players, features, and choose rules before saving.")
             return
@@ -392,8 +731,16 @@ class PlanningPokerGUI:
                 json.dump(progress_data, file)
             tk.messagebox.showinfo("Save Progress", "Progress saved successfully.")
 
-# Update the load_progress method in PlanningPokerGUI class
+
     def load_progress(self):
+        """
+        @brief Load a saved progress file, updating the state of the PlanningPokerGUI instance.
+
+        This method prompts the user to choose a progress file in JSON format.
+        It loads the data from the file, updating players, features, rules, and collected votes.
+
+        @return void
+        """
         file_path = filedialog.askopenfilename(defaultextension=".json", filetypes=[("JSON files", "*.json")])
         if file_path:
             with open(file_path, "r") as file:
@@ -408,18 +755,46 @@ class PlanningPokerGUI:
             elif rules_type == "AverageRule":
                 self.rules = AverageRule()
 
-            # Update the label in the main window
+            
             self.update_players_label()
+            self.update_features_label()
+            self.update_rules_label()
 
             # Load collected votes
             self.votes = progress_data.get("votes", {})
 
             tk.messagebox.showinfo("Load Progress", "Progress loaded successfully.")
 
+        self.update_features_label()
+        self.update_rules_label()
+
+    def update_features_label(self):
+        # Update the label displaying features
+        features_text = ", ".join(self.features)
+        self.top_labels[2].config(text=f"Features: {features_text}")
+
+    def update_rules_label(self):
+        # Update the label displaying selected rules
+        if self.rules:
+            rules_text = f"Selected Rules: {self.rules.__class__.__name__}"
+        else:
+            rules_text = "Selected Rules: None"
+        self.selected_rule_label.config(text=rules_text)
+
+
 
     def run(self):
+        """
+        @brief Run the Tkinter main loop.
+    
+        This method starts the Tkinter main loop, allowing the graphical user interface to function.
+    
+        @return void
+        """
         self.root.mainloop()
+
 
 if __name__ == "__main__":
     planning_poker_gui = PlanningPokerGUI()
     planning_poker_gui.run()
+
